@@ -131,10 +131,8 @@ class TiledElement(object):
                                  self.__class__.__name__))
 
         if invalid:
-            msg = "This name(s) is reserved for {0} objects and cannot be used."
-            print(msg.format(self.__class__.__name__))
-            print("Please change the name(s) in Tiled and try again.")
-            raise ValueError
+            msg = "This name(s) is reserved for {0} objects and cannot be used. Please change the name(s) in Tiled and try again."
+            raise ValueError(msg.format(self.__class__.__name__))
 
         self.properties = prop
 
@@ -256,8 +254,7 @@ class TiledMap(TiledElement):
             raise ValueError
         except TypeError:
             msg = "Tiles must be specified in integers."
-            print(msg)
-            raise TypeError
+            raise TypeError(msg)
 
         else:
             return self.get_tile_image_by_gid(gid)
@@ -273,12 +270,10 @@ class TiledMap(TiledElement):
             return self.images[gid]
         except (TypeError):
             msg = "GIDs must be expressed as a number.  Got: {0}"
-            print(msg.format(gid))
-            raise TypeError
+            raise TypeError(msg.format(gid))
         except (AssertionError, IndexError):
             msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
-            print(msg.format(gid))
-            raise ValueError
+            raise ValueError(msg.format(gid))
 
     def get_tile_gid(self, x, y, layer):
         """Return the tile image GID for this location
@@ -327,16 +322,14 @@ class TiledMap(TiledElement):
             gid = self.layers[int(layer)].data[int(y)][int(x)]
         except (IndexError, ValueError):
             msg = "Coords: ({0},{1}) in layer {2} is invalid."
-            print(msg.format(x, y, layer))
-            raise Exception
+            raise Exception(msg.format(x, y, layer))
 
         else:
             try:
                 return self.tile_properties[gid]
             except (IndexError, ValueError):
                 msg = "Coords: ({0},{1}) in layer {2} has invalid GID: {3}"
-                print(msg.format(x, y, layer, gid))
-                raise Exception
+                raise Exception(msg.format(x, y, layer, gid))
             except KeyError:
                 return None
 
@@ -393,8 +386,7 @@ class TiledMap(TiledElement):
             layer = int(layer)
         except (TypeError, AssertionError):
             msg = "Layer must be a positive integer.  Got {0} instead."
-            print(msg.format(type(layer)))
-            raise ValueError
+            raise ValueError(msg.format(type(layer)))
 
         p = product(range(self.width), range(self.height))
         layergids = set(self.layers[layer].data[y][x] for x, y in p)
@@ -435,8 +427,7 @@ class TiledMap(TiledElement):
             return self.layernames[name]
         except KeyError:
             msg = 'Layer "{0}" not found.'
-            print(msg.format(name))
-            raise ValueError
+            raise ValueError(msg.format(name))
 
     def get_object_by_name(self, name):
         """Find an object
@@ -523,8 +514,7 @@ class TiledMap(TiledElement):
             return None
         except TypeError:
             msg = "GIDs must be an integer"
-            print(msg)
-            raise TypeError
+            raise TypeError(msg)
 
 
 class TiledTileset(TiledElement):
@@ -579,13 +569,11 @@ class TiledTileset(TiledElement):
                     node = ElementTree.parse(path).getroot()
                 except IOError:
                     msg = "Cannot load external tileset: {0}"
-                    print(msg.format(path))
-                    raise Exception
+                    raise Exception(msg.format(path))
 
             else:
                 msg = "Found external tileset, but cannot handle type: {0}"
-                print(msg.format(self.source))
-                raise Exception
+                raise Exception(msg.format(self.source))
 
         self.set_properties(node)
 
@@ -661,8 +649,7 @@ class TiledTileLayer(TiledElement):
 
         elif encoding:
             msg = 'TMX encoding type: {0} is not supported.'
-            print(msg.format(encoding))
-            raise Exception
+            raise Exception(msg.format(encoding))
 
         compression = data_node.get('compression', None)
         if compression == 'gzip':
@@ -677,8 +664,7 @@ class TiledTileLayer(TiledElement):
 
         elif compression:
             msg = 'TMX compression type: {0} is not supported.'
-            print(msg.format(compression))
-            raise Exception
+            raise Exception(msg.format(compression))
 
         # if data is None, then it was not decoded or decompressed, so
         # we assume here that it is going to be a bunch of tile elements
@@ -695,8 +681,7 @@ class TiledTileLayer(TiledElement):
                 iterator = (data[i:i+4] for i in range(0, len(data), 4))
                 next_gid = (fmt.unpack(i)[0] for i in iterator)
             else:
-                print(type(data))
-                raise Exception
+                raise Exception(type(data))
 
         def init():
             return [0] * self.width
