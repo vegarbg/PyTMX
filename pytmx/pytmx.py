@@ -233,7 +233,7 @@ class TiledMap(TiledElement):
 
         :param x: x coordinate
         :param y: y coordinate
-        :param layer: layer number
+        :param layer: TileTileLayer
         :rtype: pygame surface if found, otherwise 0
         """
         try:
@@ -242,11 +242,10 @@ class TiledMap(TiledElement):
             raise ValueError
 
         try:
-            layer = self.layers[layer]
-        except IndexError:
-            raise ValueError
-
-        assert (isinstance(layer, TiledTileLayer))
+            assert (isinstance(layer, TiledTileLayer))
+        except AssertionError:
+            msg = "Layer must be a TiledTileLayer object."
+            raise TypeError(msg)
 
         try:
             gid = layer.data[y][x]
@@ -280,16 +279,22 @@ class TiledMap(TiledElement):
 
         :param x: x coordinate
         :param y: y coordinate
-        :param layer: layer number
+        :param layer: TileTileLayer
         :rtype: pygame surface if found, otherwise ValueError
         """
         try:
-            assert (x >= 0 and y >= 0 and layer >= 0)
+            assert (x >= 0 and y >= 0)
         except AssertionError:
             raise ValueError
 
         try:
-            return self.layers[int(layer)].data[int(y)][int(x)]
+            assert (isinstance(layer, TiledTileLayer))
+        except AssertionError:
+            msg = "Layer must be a TiledTileLayer object."
+            raise TypeError(msg)
+
+        try:
+            return layer.data[int(y)][int(x)]
         except (IndexError, ValueError):
             msg = "Coords: ({0},{1}) in layer {2} is invalid"
             logger.debug(msg, (x, y, layer))
@@ -300,7 +305,7 @@ class TiledMap(TiledElement):
 
         :param x: x coordinate
         :param y: y coordinate
-        :param layer: layer number
+        :param layer: TileTileLayer
         :rtype: pygame surface if found, otherwise ValueError
         """
         raise NotImplementedError
@@ -310,16 +315,22 @@ class TiledMap(TiledElement):
 
         :param x: x coordinate
         :param y: y coordinate
-        :param layer: layer number
+        :param layer: TileTileLayer
         :rtype: python dict if found, otherwise None
         """
         try:
-            assert (x >= 0 and y >= 0 and layer >= 0)
+            assert (x >= 0 and y >= 0)
         except AssertionError:
             raise ValueError
 
         try:
-            gid = self.layers[int(layer)].data[int(y)][int(x)]
+            assert (isinstance(layer, TiledTileLayer))
+        except AssertionError:
+            msg = "Layer must be a TiledTileLayer object."
+            raise TypeError(msg)
+
+        try:
+            gid = layer.data[int(y)][int(x)]
         except (IndexError, ValueError):
             msg = "Coords: ({0},{1}) in layer {2} is invalid."
             raise Exception(msg.format(x, y, layer))
@@ -377,19 +388,19 @@ class TiledMap(TiledElement):
     def get_tile_properties_by_layer(self, layer):
         """Get the tile properties of each GID in layer
 
-        :param layer: layer number
+        :param layer: TileTileLayer
         rtype: iterator of (gid, properties) tuples for each tile gid with \
         properties in the tile layer
         """
+
         try:
-            assert (int(layer) >= 0)
-            layer = int(layer)
-        except (TypeError, AssertionError):
-            msg = "Layer must be a positive integer.  Got {0} instead."
-            raise ValueError(msg.format(type(layer)))
+            assert (isinstance(layer, TiledTileLayer))
+        except AssertionError:
+            msg = "Layer must be a TiledTileLayer object."
+            raise TypeError(msg)
 
         p = product(range(self.width), range(self.height))
-        layergids = set(self.layers[layer].data[y][x] for x, y in p)
+        layergids = set(layer.data[y][x] for x, y in p)
 
         for gid in layergids:
             try:
